@@ -15,8 +15,6 @@ read -p "Local mount point (default: /mnt/fibermodem): " MOUNT_POINT
 
 echo
 echo "Creating the script..."
-
-# ساخت فایل با cat و EOF ساده
 cat > /etc/hotplug.d/iface/99-cifs-mount << 'SCRIPT_EOF'
 #!/bin/sh
 
@@ -73,7 +71,6 @@ cat > /etc/hotplug.d/iface/99-cifs-mount << 'SCRIPT_EOF'
 ) &
 SCRIPT_EOF
 
-# جایگزینی مقادیر
 sed -i "s|MOUNT_POINT_PLACEHOLDER|$MOUNT_POINT|g" /etc/hotplug.d/iface/99-cifs-mount
 sed -i "s|SMB_IP_PLACEHOLDER|$SMB_IP|g" /etc/hotplug.d/iface/99-cifs-mount
 sed -i "s|SMB_SHARE_PLACEHOLDER|$SMB_SHARE|g" /etc/hotplug.d/iface/99-cifs-mount

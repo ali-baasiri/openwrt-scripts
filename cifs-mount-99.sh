@@ -5,18 +5,18 @@ echo "  CIFS + MiniDLNA Auto Installer"
 echo "======================================"
 echo
 
-# گرفتن اطلاعات از کاربر
-read -p "آدرس سرور SMB (مثال: 192.168.90.1): " SMB_IP
-read -p "نام اشتراک (مثال: usbshare/usb1_2): " SMB_SHARE
-read -p "نام کاربری: " SMB_USER
-read -p "رمز عبور: " SMB_PASS
-read -p "مسیر مونت محلی (پیش‌فرض /mnt/fibermodem): " MOUNT_POINT
+# Ask for information
+read -p "SMB Server IP (example: 192.168.90.1): " SMB_IP
+read -p "SMB Share name (example: usbshare/usb1_2): " SMB_SHARE
+read -p "Username: " SMB_USER
+read -p "Password: " SMB_PASS
+read -p "Local mount point (default: /mnt/fibermodem): " MOUNT_POINT
 
-# مقدار پیش‌فرض برای مسیر مونت
+# Default mount point
 [ -z "$MOUNT_POINT" ] && MOUNT_POINT="/mnt/fibermodem"
 
 echo
-echo "در حال ساخت اسکریپت..."
+echo "Creating the script..."
 
 cat > /etc/hotplug.d/iface/99-cifs-mount << EOF
 #!/bin/sh
@@ -77,6 +77,6 @@ EOF
 chmod +x /etc/hotplug.d/iface/99-cifs-mount
 
 echo
-echo "نصب با موفقیت انجام شد!"
-echo "فایل ساخته شد در: /etc/hotplug.d/iface/99-cifs-mount"
-echo "برای اعمال، روتر را ریستارت کنید."
+echo "Installation completed successfully!"
+echo "Script created at: /etc/hotplug.d/iface/99-cifs-mount"
+echo "Please reboot the router to apply."

@@ -15,7 +15,12 @@ read -p "Local mount point (default: /mnt/fibermodem): " MOUNT_POINT
 
 echo
 echo "Creating the script..."
-cat > /etc/hotplug.d/iface/99-cifs-mount << 'SCRIPT_EOF'
+
+# پاک کردن فایل قبلی
+rm -f /etc/hotplug.d/iface/99-cifs-mount
+
+# نوشتن فایل خط به خط (روش مقاوم)
+cat << 'EOF' > /etc/hotplug.d/iface/99-cifs-mount
 #!/bin/sh
 
 [ "$ACTION" = "ifup" ] || exit 0
@@ -25,23 +30,22 @@ cat > /etc/hotplug.d/iface/99-cifs-mount << 'SCRIPT_EOF'
   logger -t cifs-mount "Script started"
   sleep 60
 
-  mkdir -p MOUNT_POINT_PLACEHOLDER
+  mkdir -p MOUNT_POINT
 
   SUCCESS=0
 
   for i in 1 2 3 4 5 6 7 8 9 10; do
-    if grep -q " MOUNT_POINT_PLACEHOLDER " /proc/mounts; then
-      umount MOUNT_POINT_PLACEHOLDER 2>/dev/null
+    if grep -q " MOUNT_POINT " /proc/mounts; then
+      umount MOUNT_POINT 2>/dev/null
       sleep 2
     fi
 
-    mount -t cifs //SMB_IP_PLACEHOLDER/SMB_SHARE_PLACEHOLDER MOUNT_POINT_PLACEHOLDER \
-      -o username=SMB_USER_PLACEHOLDER,password=SMB_PASS_PLACEHOLDER,vers=2.0,_netdev 2>&1 | logger -t cifs-mount
+    mount -t cifs //__SMB_IP__/__SMB_SHARE__ MOUNT_POINT -o username=__SMB_USER__,password=__SMB_PASS__,vers=2.0,_netdev 2>&1 | logger -t cifs-mount
 
     sleep 6
 
-    if grep -q " MOUNT_POINT_PLACEHOLDER " /proc/mounts; then
-      CONTENT=$(ls MOUNT_POINT_PLACEHOLDER 2>/dev/null | wc -l)
+    if grep -q " MOUNT_POINT " /proc/mounts; then
+      CONTENT=$(ls MOUNT_POINT 2>/dev/null | wc -l)
       logger -t cifs-mount "Try $i: mounted OK, files=$CONTENT"
 
       if [ "$CONTENT" -gt 0 ]; then
@@ -69,9 +73,18 @@ cat > /etc/hotplug.d/iface/99-cifs-mount << 'SCRIPT_EOF'
     logger -t cifs-mount "FAILED after all retries"
   fi
 ) &
-SCRIPT_EOF
+EOF
 
-sed -i "s|MOUNT_POINT_PLACEHOLDER|$MOUNT_POINT|g" /etc/hotplug.d/iface/99-cifs-mount
-sed -i "s|SMB_IP_PLACEHOLDER|$SMB_IP|g" /etc/hotplug.d/iface/99-cifs-mount
-sed -i "s|SMB_SHARE_PLACEHOLDER|$SMB_SHARE|g" /etc/hotplug.d/iface/99-cifs-mount
-sed -i "s|SMB_USER_PLACEHOLDER|$SMB_USER|
+# جایگزینی مقادیر با sed
+sed -i "s|__MOUNT_POINT__|$MOUNT_POINT|g" /etc/hotplug.d/iface/99-cifs-mount
+sed -i "s|__SMB_IP__|$SMB_IP|g" /etc/hotplug.d/iface/99-cifs-mount
+sed -i "s|__SMB_SHARE__|$SMB_SHARE|g" /etc/hotplug.d/iface/99-cifs-mount
+sed -i "s|__SMB_USER__|$SMB_USER|g" /etc/hotplug.d/iface/99-cifs-mount
+sed -i "s|__SMB_PASS__|$SMB_PASS|g" /etc/hotplug.d/iface/99-cifs-mount
+
+chmod +x /etc/hotplug.d/iface/99-cifs-mount
+
+echo
+echo "Installation completed successfully!"
+echo "File created: /etc/hotplug.d/iface/99-cifs-mount"
+echo "Please reboot the router."
